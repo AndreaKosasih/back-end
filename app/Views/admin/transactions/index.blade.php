@@ -20,18 +20,14 @@
                         </svg>
                     <div>
                         <p class="text-slate-500 text-sm">Total Amount</p>
-                        <h3 class="text-indigo-950 text-xl font-bold">Rp 183409</h3>
-                    </div>
-                    <div>
-                        <p class="text-slate-500 text-sm">Date</p>
-                        <h3 class="text-indigo-950 text-xl font-bold">12 Jan 2024</h3>
+                        <h3 class="text-indigo-950 text-xl font-bold">Rp {{$transaction->total_amount}}</h3>
                     </div>
                     <div class="hidden md:flex flex-col">
                         <p class="text-slate-500 text-sm">Student</p>
-                        <h3 class="text-indigo-950 text-xl font-bold">Annima Poppo</h3>
+                        <h3 class="text-indigo-950 text-xl font-bold">{{$transaction->user->name}}</h3>
                     </div>
                     <div class="hidden md:flex flex-row items-center gap-x-3">
-                        <a href="#" class="font-bold py-4 px-6 bg-indigo-700 text-white rounded-full">
+                        <a href="admin/transactions/show" class="font-bold py-4 px-6 bg-indigo-700 text-white rounded-full">
                             View Details
                         </a>
                     </div>

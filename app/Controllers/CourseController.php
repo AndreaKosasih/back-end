@@ -7,6 +7,8 @@ use App\Models\Course;
 use App\Models\RoleUserModel;
 use App\Models\Category;
 use App\Models\Teacher;
+use App\Models\User;
+use App\Models\CourseStudent;
 
 class CourseController extends BaseController
 {
@@ -14,6 +16,8 @@ class CourseController extends BaseController
     protected $roleUserModel;
     protected $categoryModel;
     protected $teacherModel;
+    protected $userModel;
+    protected $courseStudentModel;
 
     public function __construct()
     {
@@ -22,65 +26,46 @@ class CourseController extends BaseController
         $this->roleUserModel = new RoleUserModel();
         $this->categoryModel = new Category();
         $this->teacherModel = new Teacher();
+        $this->userModel = new User();
+        $this->courseStudentModel = new CourseStudent();
     }
 
     public function index()
     {
-        // Ambil user_id dari session
-        $userId = session()->get('user_id');
+        // Get the logged-in user
+        $userId = session()->get('user_id');  // Assuming 'user_id' is stored in session
+        $userModel = new User();
         
-        // Ambil role_id dari user berdasarkan user_id
-        $roleUser = $this->roleUserModel->where('user_id', $userId)->first();
+        // Fetch user object from the database
+        $user = $userModel->find($userId);  // Returns the user as an object, not an array
         
-        if (!$roleUser) {
-            // Jika tidak ditemukan role_user, redirect atau tampilkan error
-            return redirect()->to('/login')->with('error', 'Unauthorized access');
+        if (!$user) {
+            // Handle the case when user is not found
+            return redirect()->to('/login');
         }
-    
-        // Ambil role_id pengguna
-        $roleId = $roleUser['role_id'];
-    
-        // Jika role_id adalah owner (misalnya role_id 1 untuk owner)
-        if ($roleId == 1) {
-            // Tampilkan semua course jika user adalah owner
-            $courses = $this->courseModel->findAll();
-        } else if ($roleId == 3) {
-            // Jika role_id adalah teacher (misalnya role_id 3 untuk teacher)
-            // Tampilkan kursus yang dimiliki oleh teacher
-            $courses = $this->courseModel->where('teacher_id', $userId)->findAll();
-        } else {
-            // Jika role bukan owner atau teacher, redirect ke halaman error atau tidak diizinkan
-            return redirect()->to('/login')->with('error', 'Unauthorized access');
+        
+        // Load CourseModel
+        $courseModel = new Course();
+        
+        // Start the query
+        $builder = $courseModel->select('courses.*, categories.name as category_name, teachers.name as teacher_name')
+                               ->join('categories', 'categories.id = courses.category_id')
+                               ->join('teachers', 'teachers.id = courses.teacher_id')
+                               ->orderBy('courses.id', 'DESC');
+        
+        // Check if the user has the 'teacher' role
+        if ($user->hasRole('teacher')) {
+            // If the user is a teacher, filter courses where the teacher_id matches the user's ID
+            $builder->where('teachers.user_id', $user->id);
         }
-    
-        // Menambahkan jumlah siswa dan video untuk setiap kursus
-        foreach ($courses as &$course) {
-            // Mengambil objek model dari ID kursus
-            $courseObj = $this->courseModel->find($course['id']);
-            
-            // Pastikan $courseObj adalah objek model, dan tidak array
-            if ($courseObj) {
-                // Hitung jumlah siswa
-                $course['students_count'] = count($courseObj->students());
-    
-                // Hitung jumlah video
-                $course['videos_count'] = count($courseObj->course_videos());
-            }
-        }
-    
-        // Tampilkan view dengan data courses yang sesuai dengan role
-        return view('admin/courses/index', [
-            'courses' => $courses,
-            'categories' => $this->categoryModel->findAll(),
-            'teachers' => $this->teacherModel->findAll()
-        ]);
+
+        // Get the courses with pagination
+        $courses = $builder->paginate(10);
+        
+        // Pass the courses data to the view
+        return view('admin/courses/index', ['courses' => $courses]);
     }
     
-    
-    
-
-    
-
     public function create()
     {
         // Load models to get categories and teachers

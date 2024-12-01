@@ -29,4 +29,10 @@ class SubscribeTransaction extends Model
         $userModel = new \App\Models\User();
         return $userModel->find($this->user_id);
     }
+
+    // Menggunakan query builder
+    public function getTransactions()
+    {
+        return $this->orderBy('id', 'DESC')->findAll();
+    }
 }

@@ -104,19 +104,20 @@
                                 </div>
                             </div>
 
+                            <!-- Count students and videos in the view -->
                             <div class="d-flex flex-column align-items-center">
                                 <p class="text-muted">Students</p>
-                                <h5 class="text-primary"><?= count($course->students) ?></h5>
+                                <h5 class="text-primary"><?= isset($course->students) ? count($course->students) : 0 ?></h5>
                             </div>
 
                             <div class="d-flex flex-column align-items-center">
                                 <p class="text-muted">Videos</p>
-                                <h5 class="text-primary"><?= count($course->course_videos) ?></h5>
+                                <h5 class="text-primary"><?= isset($course->course_videos) ? count($course->course_videos) : 0 ?></h5>
                             </div>
 
                             <div class="d-flex flex-column align-items-center">
                                 <p class="text-muted">Teacher</p>
-                                <h5 class="text-primary"><?= $course->teacher->user->name ?></h5>
+                                <h5 class="text-primary"><?= $course->teacher->user->name ?? 'N/A' ?></h5>
                             </div>
 
                             <div class="d-flex align-items-center gap-x-3">

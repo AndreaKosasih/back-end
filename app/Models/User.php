@@ -33,16 +33,19 @@ class User extends Model
     public function hasRole($role)
     {
         $roles = $this->roles();
-        if (!$roles) {
+        
+        // Jika tidak ada role yang ditemukan, kembalikan false
+        if (empty($roles)) {
             return false;
         }
 
-        foreach ($roles as $r) {
-            if ($r->name === $role) {
-                return true;
-            }
-        }
-        return false;
+        // Gunakan array_map untuk mendapatkan nama role dalam array
+        $roleNames = array_map(function($r) {
+            return $r->name;
+        }, $roles);
+
+        // Cek apakah nama role yang diberikan ada dalam array
+        return in_array($role, $roleNames);
     }
 
     /**
@@ -61,6 +64,11 @@ class User extends Model
         return $builder->get()->getResultArray();
     }
 
+    /**
+     * Get all subscribe transactions for the user.
+     *
+     * @return array
+     */
     public function subscribe_transactions()
     {
         $db = \Config\Database::connect();
@@ -70,7 +78,11 @@ class User extends Model
             ->getResultArray();
     }
 
-
+    /**
+     * Check if the user has an active subscription.
+     *
+     * @return bool
+     */
     public function hasActiveSubscription()
     {
         $db = \Config\Database::connect();
@@ -95,4 +107,18 @@ class User extends Model
         $currentDate = new \DateTime();
         return $currentDate <= $subscriptionEndDate;
     }
-}    
+
+    /**
+     * Get the role by its ID (Optional function).
+     *
+     * @param int $roleId
+     * @return object|null
+     */
+    public function getRoleById($roleId)
+    {
+        return $this->db->table('roles')
+            ->where('id', $roleId)
+            ->get()
+            ->getRow();
+    }
+}

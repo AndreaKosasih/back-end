@@ -38,7 +38,6 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
         $routes->get('/learning/(:segment)/(:segment)', 'FrontController::learning/$1/$2', ['as' => 'front.learning']);
     });
 
-    // ['filter' => 'role:owner', 'as' => 'admin.']
     // Admin Routes with Role 'owner'
     $routes->group('admin', ['namespace' => 'App\Controllers', 'filter' => 'role:owner'], function ($routes) {
         // Rute untuk mengelola kategori
@@ -53,12 +52,23 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
         $routes->get('teachers', 'TeacherController::index');
         $routes->get('teachers/create', 'TeacherController::create');
         $routes->post('teachers/store', 'TeacherController::store');
+        $routes->delete('teachers/delete/(:segment)', 'TeacherController::delete/$1');
 
-
-
+        // Rute untuk mengelola course
+        $routes->get('courses', 'CourseController::index');
+        $routes->get('courses/create', 'CourseController::create');
 
         // $routes->resource('teachers', ['controller' => 'TeacherController']);
         $routes->resource('subscribe_transactions', ['controller' => 'SubscribeTransactionController']);
+    });
+
+    // Teacher Routes with Role 'teacher'
+    $routes->group('teacher',['namespace' => 'App\Controllers', 'filter' => 'role:teacher'], function ($routes) {
+        // Rute untuk mengelola course
+        $routes->get('course', 'TeacherController::courses');
+        $routes->get('/teacher/loadManageCourses', 'TeacherController::loadManageCourses');
+        $routes->get('courses/create', 'CourseController::create');
+        $routes->delete('courses/delete/(:segment)', 'CourseController::delete/$1');
     });
 
     // Courses Routes for 'owner' and 'teacher' roles

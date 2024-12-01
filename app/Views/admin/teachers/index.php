@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Teachers</title>
-    <!-- Link ke Bootstrap atau CSS lain -->
+    <!-- Link to Bootstrap or other CSS files -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -62,47 +62,50 @@
             color: white;
             min-height: 100vh;
         }
+
         .sidebar a {
             color: white;
         }
+
+        .sidebar a:hover {
+            text-decoration: none;
+        }
+
     </style>
 </head>
 <body>
     <div class="d-flex">
-
         <div class="sidebar p-3">
-                <h3 class="text-center">Admin</h3>
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/admin/categories">Manage Categories</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Manage Courses</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/admin/teachers">Manage Teachers</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Manage Subscriptions</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/logout">Logout</a>
-                    </li>
-                </ul>
+            <h3 class="text-center">Admin</h3>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/categories">Manage Categories</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/courses">Manage Courses</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/teachers">Manage Teachers</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Manage Subscriptions</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">Logout</a>
+                </li>
+            </ul>
         </div>
 
         <div class="container">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    Manage Teachers
-                </h2>
+                <h2 class="font-semibold text-xl text-gray-800 leading-tight">Manage Teachers</h2>
                 <a href="/admin/teachers/create" class="btn btn-primary">Add New</a>
             </div>
 
-            <!-- Menampilkan Flash Message jika ada -->
+            <!-- Display Flash Messages if there are any -->
             <?php if (session()->getFlashdata('success')): ?>
                 <div class="alert alert-success">
                     <?= session()->getFlashdata('success') ?>
@@ -118,35 +121,39 @@
             <div class="py-12">
                 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-10 flex flex-col gap-y-5">
-                        <!-- Loop data teachers -->
-                        <?php foreach ($teachers as $teacher): ?>
-                            <div class="item-card">
-                                <div class="d-flex align-items-center">
-                                    <img src="<?= base_url('uploads/teachers/' . esc($teacher['photo'])) ?>" alt="Teacher Photo">
-                                    <div class="ms-3">
-                                        <h3 class="text-indigo-950 text-xl font-bold"><?= esc($teacher['name']) ?></h3>
+                        <!-- Loop through teachers data -->
+                        <?php if (!empty($teachers)): ?>
+                            <?php foreach ($teachers as $teacher): ?>
+                                <?php
+                                    // Retrieve user data based on user_id
+                                    $user = $userModel->find($teacher['user_id']);
+                                    if ($user) {
+                                        $avatarUrl = base_url('uploads/avatars/' . esc($user['avatar']));
+                                        $name = esc($user['name']);
+                                    } else {
+                                        $avatarUrl = base_url('uploads/avatars/default-avatar.png'); // Default image
+                                        $name = "Unknown Teacher";
+                                    }
+                                ?>
+                                <div class="item-card">
+                                    <div class="d-flex align-items-center">
+                                        <img src="<?= $avatarUrl ?>" alt="Teacher Photo">
+                                        <div class="ms-3">
+                                            <h3 class="text-indigo-950 text-xl font-bold"><?= $name ?></h3>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-none d-md-flex flex-row items-center gap-x-3">
+                                        <!-- Delete form for teacher -->
+                                        <form action="/admin/teachers/delete/<?= esc($teacher['id']) ?>" method="POST">
+                                            <?= csrf_field() ?>
+                                            <input type="hidden" name="_method" value="DELETE">
+                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                        </form>
                                     </div>
                                 </div>
-
-                                <div class="d-none d-md-flex flex-column">
-                                    <p class="text-slate-500 text-sm">Date</p>
-                                    <h3 class="text-indigo-950 text-xl font-bold"><?= esc($teacher['created_at']) ?></h3>
-                                </div>
-
-                                <div class="d-none d-md-flex flex-row items-center gap-x-3">
-                                    <form action="/admin/teachers/<?= esc($teacher['id']) ?>" method="POST">
-                                    <?= csrf_field() ?>
-                                    <input type="hidden" name="_method" value="DELETE">
-                                    <button type="submit" class="btn btn-danger">
-                                        Delete
-                                    </button>
-                                </form>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-
-                        <!-- Tampilkan jika tidak ada teacher -->
-                        <?php if (empty($teachers)): ?>
+                            <?php endforeach; ?>
+                        <?php else: ?>
                             <p class="text-center">No teachers found.</p>
                         <?php endif; ?>
                     </div>
@@ -155,7 +162,7 @@
         </div>
     </div>
 
-<!-- Script untuk Bootstrap -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

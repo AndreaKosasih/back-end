@@ -34,7 +34,7 @@
                     <a class="nav-link" href="/admin/categories">Manage Categories</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/admin/courses">Manage Courses</a>
+                    <a class="nav-link" href="#">Manage Courses</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/admin/teachers">Manage Teachers</a>
@@ -47,6 +47,11 @@
                 </li>
             </ul>
         </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 p-6 overflow-auto">
+        <?= $this->renderSection('content') ?>
     </div>
 
     <!-- Script untuk Bootstrap -->

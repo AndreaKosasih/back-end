@@ -33,7 +33,7 @@
                     <a class="nav-link" href="/admin/categories">Manage Categories</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Manage Courses</a>
+                    <a class="nav-link" href="/admin/courses">Manage Courses</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/admin/teachers">Manage Teachers</a>
@@ -62,11 +62,7 @@
                             <img src="<?= base_url('uploads/categories/' . esc($category['icon'])) ?>" class="card-img-top" alt="<?= esc($category['name']) ?>">
                             <div class="card-body">
                                 <h5 class="card-title"><?= esc($category['name']) ?></h5>
-
                                 <a href="/admin/categories/edit//<?= esc($category['id']) ?>" class="btn btn-primary">Edit</a>
-
-
-
                                 <form action="/admin/categories/delete/<?= esc($category['id']) ?>" method="POST" style="display:inline;">
                                     <?= csrf_field() ?>
                                     <button type="submit" class="btn btn-danger">Delete</button>

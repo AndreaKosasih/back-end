@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controllers;
 
 use App\Models\User;
@@ -13,7 +14,7 @@ class AuthController extends Controller
 
     public function register()
     {
-        return view('register'); 
+        return view('register');
     }
 
     public function authenticate()
@@ -77,91 +78,191 @@ class AuthController extends Controller
         }
     }
 
+    //     public function registerUser()
+    // {
+    //     $session = session();
+    //     $userModel = new User();
+    //     $roleUserModel = new \App\Models\RoleUserModel();
+    //     $db = \Config\Database::connect();
+
+    //     // Validasi input
+    //     $validation = \Config\Services::validation();
+    //     $validation->setRules([
+    //         'name'      => 'required|min_length[3]|max_length[50]',
+    //         'email'     => 'required|valid_email|is_unique[users.email]',
+    //         'password'  => 'required|min_length[8]',
+    //         'occupation' => 'required|min_length[3]|max_length[100]', // Validasi untuk occupation
+    //         'avatar'    => 'is_image[avatar]|mime_in[avatar,image/jpg,image/jpeg,image/png]|max_size[avatar,1024]',
+    //     ]);
+
+    //     if (!$validation->withRequest($this->request)->run()) {
+    //         return redirect()->back()->withInput()->with('errors', $validation->getErrors());
+    //     }
+
+    //     // Ambil data input
+    //     $name = $this->request->getPost('name');
+    //     $email = $this->request->getPost('email');
+    //     $occupation = $this->request->getPost('occupation');
+    //     $password = password_hash($this->request->getPost('password'), PASSWORD_DEFAULT);
+
+    //     // Handle avatar upload
+    //     $avatar = $this->request->getFile('avatar');
+    //     $avatarName = null;
+
+    //     if ($avatar->isValid() && !$avatar->hasMoved()) {
+    //         // Generate unique file name
+    //         $avatarName = $avatar->getRandomName();
+    //         // Move file to the desired directory
+    //         $avatar->move(WRITEPATH . 'uploads/avatars', $avatarName);
+    //     }
+
+    //     // Siapkan data untuk disimpan ke tabel users
+    //     $userData = [
+    //         'name'       => $name,
+    //         'email'      => $email,
+    //         'password'   => $password,
+    //         'avatar'     => $avatarName,  // Save avatar name in the database
+    //         'occupation' => $occupation, // Tambahkan occupation
+    //     ];
+
+    //     // Cek apakah $userData tidak kosong
+    //     if (empty($userData['name']) || empty($userData['email']) || empty($userData['password']) || empty($userData['occupation'])) {
+    //         return redirect()->back()->withInput()->with('errors', ['Please fill in all required fields.']);
+    //     }
+
+    //     // Insert user data into the database
+    //     $userModel->save($userData);
+
+    //     // Ambil user_id secara manual berdasarkan email
+    //     $user = $userModel->where('email', $email)->first(); // Cari berdasarkan email
+    //     if (!$user) {
+    //         // Jika user tidak ditemukan setelah insert
+    //         return redirect()->back()->withInput()->with('errors', ['Failed to register user.']);
+    //     }
+
+    //     $userId = $user['id']; // Ambil user_id
+
+    //     // Pastikan role_id yang ingin disimpan ada di tabel roles
+    //     $roleId = 2; // Default role_id untuk student adalah 2
+
+    //     // Pastikan role_id valid dan ada di tabel roles
+    //     $roleModel = new \App\Models\RoleModel(); // Ambil model role
+    //     $role = $roleModel->find($roleId);
+
+    //     if (!$role) {
+    //         // Jika role tidak ditemukan, tampilkan error
+    //         return redirect()->back()->withInput()->with('errors', ['Invalid role_id']);
+    //     }
+
+    //     // Masukkan data ke tabel role_user untuk role student
+    //     $roleUserModel->save([
+    //         'user_id' => $userId,
+    //         'role_id' => $roleId, // Role student
+    //     ]);
+
+    //     // Set session data
+    //     $session->set([
+    //         'user_id'    => $userId,
+    //         'name'       => $name,
+    //         'role'       => 'student',  // Default role is 'student'
+    //         'isLoggedIn' => true,
+    //     ]);
+
+    //     // Redirect ke halaman login atau halaman yang sesuai
+    //     return redirect()->to('/login');
+    // }
+
     public function registerUser()
-{
-    $session = session();
-    $userModel = new User();
-    $roleUserModel = new \App\Models\RoleUserModel(); // Menggunakan RoleModel untuk menyisipkan data ke role_user
-    $db = \Config\Database::connect();
+    {
+        $session = session();
+        $userModel = new User();
+        $roleUserModel = new \App\Models\RoleUserModel();
+        $db = \Config\Database::connect();
 
-    // Validasi input
-    $validation = \Config\Services::validation();
-    $validation->setRules([
-        'name'      => 'required|min_length[3]|max_length[50]',
-        'email'     => 'required|valid_email|is_unique[users.email]',
-        'password'  => 'required|min_length[8]',
-        'occupation' => 'required|min_length[3]|max_length[100]', // Validasi untuk occupation
-        'avatar'    => 'is_image[avatar]|mime_in[avatar,image/jpg,image/jpeg,image/png]|max_size[avatar,1024]',
-    ]);
+        // Validasi input
+        $validation = \Config\Services::validation();
+        $validation->setRules([
+            'name'      => 'required|min_length[3]|max_length[50]',
+            'email'     => 'required|valid_email|is_unique[users.email]',
+            'password'  => 'required|min_length[8]',
+            'occupation' => 'required|min_length[3]|max_length[100]', // Validasi untuk occupation
+            'avatar'    => 'is_image[avatar]|mime_in[avatar,image/jpg,image/jpeg,image/png]|max_size[avatar,1024]',
+        ]);
 
-    if (!$validation->withRequest($this->request)->run()) {
-        return redirect()->back()->withInput()->with('errors', $validation->getErrors());
+        if (!$validation->withRequest($this->request)->run()) {
+            return redirect()->back()->withInput()->with('errors', $validation->getErrors());
+        }
+
+        // Ambil data input
+        $name = $this->request->getPost('name');
+        $email = $this->request->getPost('email');
+        $occupation = $this->request->getPost('occupation');
+        $password = password_hash($this->request->getPost('password'), PASSWORD_DEFAULT);
+
+        // Handle avatar upload
+        $avatar = $this->request->getFile('avatar');
+        $avatarName = null;
+
+        if ($avatar->isValid() && !$avatar->hasMoved()) {
+            // Generate unique file name
+            $avatarName = $avatar->getRandomName();
+            // Move file to the desired directory
+            $avatar->move(WRITEPATH . 'uploads/avatars', $avatarName);
+        }
+
+        // Siapkan data untuk disimpan ke tabel users
+        $userData = [
+            'name'       => $name,
+            'email'      => $email,
+            'password'   => $password,
+            'avatar'     => $avatarName,  // Save avatar name in the database
+            'occupation' => $occupation, // Tambahkan occupation
+        ];
+
+        // Cek apakah $userData tidak kosong
+        if (empty($userData['name']) || empty($userData['email']) || empty($userData['password']) || empty($userData['occupation'])) {
+            return redirect()->back()->withInput()->with('errors', ['Please fill in all required fields.']);
+        }
+
+        // Insert user data into the database
+        $userModel->save($userData);
+
+        // Ambil user_id berdasarkan email
+        $user = $userModel->where('email', $email)->first(); // Cari berdasarkan email
+        if (!$user) {
+            // Jika user tidak ditemukan setelah insert
+            return redirect()->back()->withInput()->with('errors', ['Failed to register user.']);
+        }
+
+        $userId = $user['id']; // Ambil user_id
+
+        // Role ID untuk student adalah 2
+        $roleId = 2; // Default role_id untuk student adalah 2
+
+        // Masukkan data ke tabel role_user
+        $roleUserModel->insert([
+            'user_id' => $userId,
+            'role_id' => $roleId, // Role student
+        ]);
+
+        // Set session data
+        $session->set([
+            'user_id'    => $userId,
+            'name'       => $name,
+            'role'       => 'student',  // Default role is 'student'
+            'isLoggedIn' => true,
+        ]);
+
+        // Redirect ke halaman login atau halaman yang sesuai
+        return redirect()->to('/login');
     }
 
-    // Ambil data input
-    $name = $this->request->getPost('name');
-    $email = $this->request->getPost('email');
-    $occupation = $this->request->getPost('occupation');
-    $password = password_hash($this->request->getPost('password'), PASSWORD_DEFAULT);
 
-    // Handle avatar upload
-    $avatar = $this->request->getFile('avatar');
-    $avatarName = null;
 
-    if ($avatar->isValid() && !$avatar->hasMoved()) {
-        // Generate unique file name
-        $avatarName = $avatar->getRandomName();
-        // Move file to the desired directory
-        $avatar->move(WRITEPATH . 'uploads/avatars', $avatarName);
-    }
 
-    // Siapkan data untuk disimpan ke tabel users
-    $userData = [
-        'name'       => $name,
-        'email'      => $email,
-        'password'   => $password,
-        'avatar'     => $avatarName,  // Save avatar name in the database
-        'occupation' => $occupation, // Tambahkan occupation
-    ];
 
-    // Cek apakah $userData tidak kosong
-    if (empty($userData['name']) || empty($userData['email']) || empty($userData['password']) || empty($userData['occupation'])) {
-        return redirect()->back()->withInput()->with('errors', ['Please fill in all required fields.']);
-    }
 
-    // Insert user data into the database
-    $userModel->save($userData);
 
-    // Ambil user_id secara manual berdasarkan email
-    $user = $userModel->where('email', $email)->first(); // Cari berdasarkan email
-    if (!$user) {
-        // Jika user tidak ditemukan setelah insert
-        return redirect()->back()->withInput()->with('errors', ['Failed to register user.']);
-    }
-    
-    $userId = $user['id']; // Ambil user_id
-
-    // Set default role as 'student' and save to role_user table
-    // Here, we set the default role as 2 (student)
-    $roleUserModel->save([
-        'user_id' => $userId,
-        'role_id' => 2, // Default role_id for student is 2
-    ]);
-
-    // Set session data
-    $session->set([
-        'user_id'    => $userId,
-        'name'       => $name,
-        'role'       => 'student',  // Default role is 'student'
-        'isLoggedIn' => true,
-    ]);
-
-    // Redirect to the student dashboard or the appropriate page
-    return redirect()->to('/login');
-}
-    
-
-    
 
     private function redirectBasedOnRole($role)
     {

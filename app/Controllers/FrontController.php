@@ -10,7 +10,7 @@ class FrontController extends BaseController
 {
     public function index()
     {
-        return view('front/index'); 
+        return view('index'); 
     }
 
     public function details($slug)

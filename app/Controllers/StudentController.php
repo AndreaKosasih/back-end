@@ -9,12 +9,17 @@ class StudentController extends BaseController
 {
     public function dashboard()
     {
-        $session = session();
+        if (!session()->get('isLoggedIn')) {
+            return redirect()->to('/login');
+        }
 
-        $data = [
-            'name'        => $session->get('name'), // Ambil data nama dari session
-            'enrolledCourses' => $session->get('enrolledCourses'), // Kursus yang diikuti
-            'categories'  => $session->get('categories'), // Kategori dari kursus yang diikuti
+        // Get user data from session
+        $data['user'] = [
+            'name' => session()->get('name'),
+            'email' => session()->get('email'),
+            'role' => session()->get('role'),
+            'avatar' => session()->get('avatar'),
+            'occupation' => session()->get('occupation')
         ];
 
         return view('student/dashboard', $data);

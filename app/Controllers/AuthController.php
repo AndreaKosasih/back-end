@@ -281,64 +281,58 @@ class AuthController extends Controller
         return view('auth/register');
     }
 
-    public function authenticate()
-    {
-        $session = session();
-        $userModel = new User();
-        $db = \Config\Database::connect();
+    // public function authenticate()
+    // {
+    //     $session = session();
+    //     $userModel = new User();
+    //     $db = \Config\Database::connect();
 
-        if (!$this->validate([
-            'email'    => 'required|valid_email',
-            'password' => 'required',
-        ])) {
-            return redirect()->back()
-                ->withInput()
-                ->with('errors', $this->validator->getErrors());
-        }
+    //     if (!$this->validate([
+    //         'email'    => 'required|valid_email',
+    //         'password' => 'required',
+    //     ])) {
+    //         return redirect()->back()
+    //             ->withInput()
+    //             ->with('errors', $this->validator->getErrors());
+    //     }
 
-        $email = $this->request->getPost('email');
-        $password = $this->request->getPost('password');
-        $remember = $this->request->getPost('remember');
+    //     $email = $this->request->getPost('email');
+    //     $password = $this->request->getPost('password');
 
-        $user = $userModel->where('email', $email)->first();
+    //     $user = $userModel->where('email', $email)->first();
 
-        if ($user && password_verify($password, $user['password'])) {
-            // Get role
-            $roleQuery = $db->table('role_user')
-                ->select('roles.name as role')
-                ->join('roles', 'role_user.role_id = roles.id')
-                ->where('role_user.user_id', $user['id'])
-                ->get()
-                ->getRow();
+    //     if ($user && password_verify($password, $user['password'])) {
+    //         // Get role
+    //         $roleQuery = $db->table('role_user')
+    //             ->select('roles.name as role')
+    //             ->join('roles', 'role_user.role_id = roles.id')
+    //             ->where('role_user.user_id', $user['id'])
+    //             ->get()
+    //             ->getRow();
 
-            $role = $roleQuery ? $roleQuery->role : 'student';
+    //         $role = $roleQuery ? $roleQuery->role : 'student';
 
-            // Set session data with user info
-            $sessionData = [
-                'user_id' => $user['id'],
-                'name' => $user['name'],
-                'email' => $user['email'],
-                'role' => $role,
-                'avatar' => $user['avatar'],
-                'occupation' => $user['occupation'],
-                'isLoggedIn' => true
-            ];
+    //         // Set session data with user info
+    //         $sessionData = [
+    //             'user_id' => $user['id'],
+    //             'name' => $user['name'],
+    //             'email' => $user['email'],
+    //             'role' => $role,
+    //             'avatar' => $user['avatar'],
+    //             'occupation' => $user['occupation'],
+    //             'isLoggedIn' => true
+    //         ];
 
-            $session->set($sessionData);
+    //         $session->set($sessionData);
 
-            // Handle remember me
-            if ($remember) {
-                // ... existing remember me code ...
-            }
+    //         // Redirect with user data
+    //         return $this->redirectBasedOnRole($role);
+    //     }
 
-            // Redirect with user data
-            return $this->redirectBasedOnRole($role);
-        }
-
-        return redirect()->back()
-            ->withInput()
-            ->with('login_error', 'Invalid email or password');
-    }
+    //     return redirect()->back()
+    //         ->withInput()
+    //         ->with('login_error', 'Invalid email or password');
+    // }
 
     //     public function registerUser()
     // {
@@ -515,7 +509,7 @@ class AuthController extends Controller
         $userModel = new User();
         $db = \Config\Database::connect();
 
-        // Validasi input
+        // Validate input
         $validation = \Config\Services::validation();
         $validation->setRules([
             'email'    => 'required|valid_email',
@@ -523,52 +517,73 @@ class AuthController extends Controller
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {
-            return redirect()->back()->withInput()->with('errors', $validation->getErrors());
+            return redirect()->back()
+                ->withInput()
+                ->with('errors', $validation->getErrors());
         }
 
-        // Ambil data input
         $email = $this->request->getPost('email');
         $password = $this->request->getPost('password');
+        $rememberMe = $this->request->getPost('remember') == 'on';
 
-        // Cari user berdasarkan email
+        // Find user by email
         $user = $userModel->where('email', $email)->first();
 
-        if ($user) {
-            // Verifikasi password
-            if (password_verify($password, $user['password'])) {
-                // Ambil role pengguna dari tabel role_user melalui join
-                $roleQuery = $db->table('role_user')
-                    ->select('roles.name as role')
-                    ->join('roles', 'role_user.role_id = roles.id')
-                    ->where('role_user.user_id', $user['id'])
-                    ->get()
-                    ->getRow();
+        if ($user && password_verify($password, $user['password'])) {
+            // Get user role
+            $roleQuery = $db->table('role_user')
+                ->select('roles.name as role')
+                ->join('roles', 'role_user.role_id = roles.id')
+                ->where('role_user.user_id', $user['id'])
+                ->get()
+                ->getRow();
 
-                $role = $roleQuery ? $roleQuery->role : 'student'; // Default role jika tidak ditemukan
+            $role = $roleQuery ? $roleQuery->role : 'student';
 
-                // Data untuk setiap dashboard berdasarkan role
-                $dashboardData = $this->getDashboardData($role, $user['id']);
+            // Handle Remember Me
+            if ($rememberMe) {
+                $rememberToken = bin2hex(random_bytes(32));
+                $expiresAt = date('Y-m-d H:i:s', strtotime('+30 days'));
 
-                // Simpan data user ke session
-                $sessionData = array_merge([
-                    'user_id'    => $user['id'],
-                    'name'       => $user['name'],
-                    'role'       => $role,
-                    'isLoggedIn' => true,
-                ], $dashboardData);
+                try {
+                    $userModel->update($user['id'], [
+                        'remember_token' => $rememberToken,
+                        'remember_expires_at' => $expiresAt
+                    ]);
 
-                $session->set($sessionData);
-
-                // Redirect berdasarkan role
-                return $this->redirectBasedOnRole($role);
-            } else {
-                $session->setFlashdata('login_error', 'Invalid password. Please try again.');
-                return redirect()->back()->withInput();
+                    $response = service('response');
+                    $response->setCookie([
+                        'name' => 'remember_token',
+                        'value' => $rememberToken,
+                        'expire' => 2592000,
+                        'secure' => true,
+                        'httponly' => true
+                    ]);
+                } catch (\Exception $e) {
+                    log_message('error', 'Remember token update failed: ' . $e->getMessage());
+                }
             }
-        } else {
-            $session->setFlashdata('login_error', 'No account found with that email.');
-            return redirect()->back()->withInput();
+
+            // Set session data
+            $sessionData = [
+                'user_id' => $user['id'],
+                'name' => $user['name'],
+                'email' => $user['email'],
+                'role' => $role,
+                'avatar' => $user['avatar'] ?? 'images/default-avatar.png',
+                'occupation' => $user['occupation'],
+                'isLoggedIn' => true
+            ];
+
+            $session->set($sessionData);
+
+            // Redirect based on role
+            return $this->redirectBasedOnRole($role);
         }
+
+        return redirect()->back()
+            ->withInput()
+            ->with('login_error', 'Invalid email or password');
     }
 
     private function getDashboardData($role, $userId)

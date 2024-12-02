@@ -176,7 +176,7 @@ class AuthController extends Controller
         $userModel = new User();
         $roleUserModel = new \App\Models\RoleUserModel();
         $db = \Config\Database::connect();
-    {
+    
         $session = session();
         $userModel = new User();
         $roleUserModel = new \App\Models\RoleUserModel();

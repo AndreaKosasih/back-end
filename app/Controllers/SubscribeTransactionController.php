@@ -10,16 +10,16 @@ class SubscribeTransactionController extends BaseController
 {
     public function index()
     {
-        // Memuat database connection
+        // Ambil koneksi database
         $db = \Config\Database::connect();
-        $builder = $db->table('subscribe_transactions');
 
-        // Melakukan join dengan tabel 'users' dan mengurutkan berdasarkan 'id'
-        $builder->select('subscribe_transactions.*, users.name as user_name')
-                ->join('users', 'users.id = subscribe_transactions.user_id')
-                ->orderBy('subscribe_transactions.id', 'DESC');
+        // Buat query builder untuk join dengan tabel users
+        $builder = $db->table('subscribe_transactions')
+            ->select('subscribe_transactions.*, users.name as user_name') // Pilih kolom yang diperlukan, alias untuk name
+            ->join('users', 'users.id = subscribe_transactions.user_id')  // Join dengan tabel users berdasarkan user_id
+            ->orderBy('subscribe_transactions.id', 'desc');  // Urutkan berdasarkan id transaksi
 
-        // Ambil hasilnya
+        // Ambil hasil transaksi
         $transactions = $builder->get()->getResult();
 
         // Kirim data transaksi ke view

@@ -24,11 +24,18 @@ class SubscribeTransaction extends Model
      *
      * 
      */
+
+     // Definisikan relasi 'user'
     public function user()
     {
-        $userModel = new \App\Models\User();
-        return $userModel->find($this->user_id);
+        return $this->belongsTo('App\Models\User', 'user_id', 'id');
     }
+
+    // public function user()
+    // {
+    //     $userModel = new \App\Models\User();
+    //     return $userModel->find($this->user_id);
+    // }
 
     // Menggunakan query builder
     public function getTransactions()

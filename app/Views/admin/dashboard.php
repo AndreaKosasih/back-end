@@ -43,7 +43,7 @@
                     <a class="nav-link" href="/admin/teachers">Manage Teachers</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Manage Subscriptions</a>
+                    <a class="nav-link" href="/admin/transactions">Manage Subscriptions</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/logout">Logout</a>

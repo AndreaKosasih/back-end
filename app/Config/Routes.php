@@ -59,6 +59,7 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
         $routes->get('courses/create', 'CourseController::create');
 
         // $routes->resource('teachers', ['controller' => 'TeacherController']);
+        $routes->get('transactions', 'SubscribeTransactionController::index');
         $routes->resource('subscribe_transactions', ['controller' => 'SubscribeTransactionController']);
     });
 

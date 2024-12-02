@@ -1,54 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Dashboard</title>
-    <!-- Link CSS atau CDN untuk Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f4f6f9;
-        }
-        .sidebar {
-            background-color: #343a40;
-            color: white;
-            min-height: 100vh;
-        }
-        .sidebar a {
-            color: white;
-        }
-    </style>
+    <link rel="stylesheet" href="<?= base_url('css/styles.css') ?>">
+    <title>Profile | <?= $user['name'] ?? 'User' ?></title>
 </head>
+
 <body>
-    <div class="d-flex">
-        <!-- Sidebar -->
-        <div class="sidebar p-3">
-            <h3 class="text-center">Student</h3>
-            <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link active" href="/student/dashboard">Dashboard</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/logout">Logout</a>
+    <header class="header">
+        <a href="<?= base_url('/') ?>">
+            <div class="logo">Hands</div>
+        </a>
+        <nav>
+            <ul class="nav_links">
+                <li><a href="<?= base_url('classes') ?>">Classes</a></li>
+                <li><a href="<?= base_url('subscription') ?>">Subscription</a></li>
+                <li>
+                    <a href="<?= base_url('/login') ?>">
+                        <div class="main-button">Login</div>
+                    </a>
                 </li>
             </ul>
-        </div>
+        </nav>
+    </header>
+    <main style="margin-top: 150px  ;">
+        <section class="first-page" style="justify-content: start">
+            <h1>My Profile</h1>
+            <p>Welcome Back, <?= session()->get('name') ?? 'User' ?></p>
 
-        <!-- Main Content -->
-        <div class="container mx-auto">
-        <h1 class="text-2xl font-bold">Welcome, <?= isset($name) ? esc($name) : 'User' ?></h1>
-        <h3 class="text-indigo-950 font-bold text-2xl">Upgrade Skills Today</h3>
-                <p class="text-slate-500 text-base">
-                    Grow your career with experienced teachers in Alqowy Class.
-                </p>
-                <a href="/" class="w-fit font-bold py-4 px-6 rounded-full">
-                    Explore Catalog
-                </a>
-        </div>
-    </div>
+            <div class="profile-container">
+                <div class="profile-left">
+                    <img src="<?= base_url(('uploads/avatars/' . $user['avatar']) ?? 'images/default-avatar.png') ?>"
+                        alt="<?= $user['name'] ?? 'User' ?>'s profile photo"
+                        class="profile-image">
 
-    <!-- Script untuk Bootstrap -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+                    <div class="info-card">
+                        <div class="emp">
+                            <h3>
+                                User Information
+                            </h3>
+                        </div>
+                        <div class="user-info">
+                            <p><?= $user['name'] ?? 'Not set' ?></p>
+                            <p><?= $user['email'] ?? 'Not set' ?></p>
+                            <p><?= $user['occupation'] ?? 'Not set' ?></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-right">
+                    <div class="info-card">
+                        <h3>Continue your journey</h3>
+                        <div class="journey-grid">
+                            <div class="info-card">Journey 1</div>
+                            <div class="info-card">Journey 2</div>
+                            <div class="info-card">Journey 3</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Debug helper
+        console.log('User Data:', <?= json_encode($user ?? null) ?>);
+    </script>
 </body>
+
 </html>

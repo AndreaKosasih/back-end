@@ -2,181 +2,111 @@
 
 namespace App\Controllers;
 
-use App\Controllers\BaseController;
+use CodeIgniter\Controller;
 use App\Models\Course;
-use App\Models\RoleUserModel;
-use App\Models\Category;
-use App\Models\Teacher;
-use App\Models\User;
-use App\Models\CourseStudent;
+use App\Models\CourseKeypoint;
+use Config\Database;
 
-class CourseController extends BaseController
+class CourseController extends Controller
 {
-    protected $courseModel;
-    protected $roleUserModel;
-    protected $categoryModel;
-    protected $teacherModel;
-    protected $userModel;
-    protected $courseStudentModel;
-
-    public function __construct()
+    public function manageAdmin()
     {
-        // Inisialisasi model yang diperlukan
-        $this->courseModel = new Course();
-        $this->roleUserModel = new RoleUserModel();
-        $this->categoryModel = new Category();
-        $this->teacherModel = new Teacher();
-        $this->userModel = new User();
-        $this->courseStudentModel = new CourseStudent();
-    }
+        $db = Database::connect();
 
-    public function index()
-    {
-        // Get the logged-in user
-        $userId = session()->get('user_id');  // Assuming 'user_id' is stored in session
-        $userModel = new User();
-        
-        // Fetch user object from the database
-        $user = $userModel->find($userId);  // Returns the user as an object, not an array
-        
-        if (!$user) {
-            // Handle the case when user is not found
-            return redirect()->to('/login');
-        }
-        
-        // Load CourseModel
-        $courseModel = new Course();
-        
-        // Start the query
-        $builder = $courseModel->select('courses.*, categories.name as category_name, teachers.name as teacher_name')
-                               ->join('categories', 'categories.id = courses.category_id')
-                               ->join('teachers', 'teachers.id = courses.teacher_id')
-                               ->orderBy('courses.id', 'DESC');
-        
-        // Check if the user has the 'teacher' role
-        if ($user->hasRole('teacher')) {
-            // If the user is a teacher, filter courses where the teacher_id matches the user's ID
-            $builder->where('teachers.user_id', $user->id);
-        }
+        $courses = $db->table('courses')
+            ->select('courses.*, users.name as teacher_name, categories.name as category_name')
+            ->join('teachers', 'teachers.id = courses.teacher_id')
+            ->join('users', 'users.id = teachers.user_id') // Ambil nama guru dari tabel users
+            ->join('categories', 'categories.id = courses.category_id')
+            ->select('(SELECT COUNT(*) FROM course_students WHERE course_students.course_id = courses.id) as students_count')
+            ->select('(SELECT COUNT(*) FROM course_videos WHERE course_videos.course_id = courses.id) as videos_count')
+            ->orderBy('courses.id', 'DESC')
+            ->get()
+            ->getResult();
+    
 
-        // Get the courses with pagination
-        $courses = $builder->paginate(10);
-        
-        // Pass the courses data to the view
         return view('admin/courses/index', ['courses' => $courses]);
     }
-    
+
+    public function manageTeacher()
+    {
+        $db = Database::connect();
+        $session = session();
+        $teacherId = $session->get('user_id'); // Ambil ID teacher dari sesi login
+
+        $courses = $db->table('courses')
+            ->select('courses.*, categories.name as category_name')
+            ->join('categories', 'categories.id = courses.category_id')
+            ->select('(SELECT COUNT(*) FROM course_students WHERE course_students.course_id = courses.id) as students_count')
+            ->select('(SELECT COUNT(*) FROM course_videos WHERE course_videos.course_id = courses.id) as videos_count')
+            ->where('teacher_id', $teacherId)
+            ->orderBy('id', 'DESC')
+            ->get()
+            ->getResult();
+
+        return view('teacher/courses/index', ['courses' => $courses]);
+    }
+
     public function create()
     {
-        // Load models to get categories and teachers
-        $categories = $this->categoryModel->findAll();  // Assuming you have categories in your database
-        $teachers = $this->teacherModel->findAll();    // Assuming you have teachers in your database
+        $db = Database::connect();
 
-        // Return the view with the data
-        return view('admin/courses/create', [
-            'categories' => $categories,
-            'teachers' => $teachers
-        ]);
+        // Ambil daftar kategori
+        $categories = $db->table('categories')->select('id, name')->get()->getResult();
+
+        // Tampilkan form create dengan kategori
+        return view('teacher/courses/create', ['categories' => $categories]);
     }
-
+    
     public function store()
     {
-        // Validasi input
+        // Validasi input form
         $validation = \Config\Services::validation();
-        if (!$this->validate([
-            'name' => 'required|min_length[3]',
-            'slug' => 'required|min_length[3]',
-            'about' => 'required',
-            'category_id' => 'required',
-            'teacher_id' => 'required',
-        ])) {
-            // Kembalikan dengan pesan error jika validasi gagal
-            return redirect()->back()->withInput()->with('error', $validation->getErrors());
+        
+        // Aturan validasi
+        $rules = [
+            'name'             => 'required|min_length[3]|max_length[255]',
+            'category_id'      => 'required',  // Tidak perlu is_not_empty, cukup required
+            'thumbnail'        => 'uploaded[thumbnail]|is_image[thumbnail]|max_size[thumbnail,2048]',
+            'about'            => 'required|min_length[10]',
+        ];
+        
+        if (!$this->validate($rules)) {
+            // Jika validasi gagal, kembalikan ke form dengan error
+            return redirect()->back()->withInput()->with('errors', $validation->getErrors());
         }
 
-        // Ambil data dari form
+        // Ambil data input
+        $name         = $this->request->getVar('name');
+        $category_id  = $this->request->getVar('category_id');
+        $about        = $this->request->getVar('about');
+
+        // Menangani upload file thumbnail
+        $thumbnail = $this->request->getFile('thumbnail');
+        
+        if ($thumbnail->isValid() && !$thumbnail->hasMoved()) {
+            $thumbnailName = $thumbnail->getRandomName();  // Nama file acak
+            $thumbnail->move(WRITEPATH . 'uploads/courses', $thumbnailName); // Pindahkan ke folder yang diinginkan
+        } else {
+            return redirect()->back()->withInput()->with('errors', ['thumbnail' => 'Gagal mengupload thumbnail']);
+        }
+
+        // Menyimpan data kursus ke dalam database
+        $courseModel = new Course();
+        
         $data = [
-            'name' => $this->request->getPost('name'),
-            'slug' => $this->request->getPost('slug'),
-            'about' => $this->request->getPost('about'),
-            'category_id' => $this->request->getPost('category_id'),
-            'teacher_id' => $this->request->getPost('teacher_id'),
-            'path_trailer' => $this->request->getPost('path_trailer'), // Optional
-            'thumbnail' => $this->request->getPost('thumbnail') // Optional
+            'name'         => $name,
+            'slug'         => url_title($name, '-', true), // Generating slug from course name
+            'category_id'  => $category_id,
+            'about'        => $about,
+            'thumbnail'    => $thumbnailName,
+            'teacher_id'   => session()->get('user_id'),  // ID guru diambil dari session
         ];
 
-        // Simpan data kursus ke database
-        $this->courseModel->save($data);
+        // Insert data kursus ke tabel 'courses'
+        $courseModel->insert($data);  // Menyimpan data kursus
 
         // Redirect ke halaman kursus dengan pesan sukses
-        return redirect()->to('/admin/courses')->with('success', 'Course created successfully');
-    }
-
-    public function edit($id)
-    {
-        // Ambil data kursus yang ingin diedit
-        $course = $this->courseModel->find($id);
-
-        if (!$course) {
-            return redirect()->to('/admin/courses')->with('error', 'Course not found');
-        }
-
-        // Ambil kategori dan guru untuk pilihan dropdown
-        $categories = $this->categoryModel->findAll();
-        $teachers = $this->teacherModel->findAll();
-
-        return view('admin/courses/edit', [
-            'course' => $course,
-            'categories' => $categories,
-            'teachers' => $teachers
-        ]);
-    }
-
-    public function update($id)
-    {
-        // Validasi input
-        $validation = \Config\Services::validation();
-        if (!$this->validate([
-            'name' => 'required|min_length[3]',
-            'slug' => 'required|min_length[3]',
-            'about' => 'required',
-            'category_id' => 'required',
-            'teacher_id' => 'required',
-        ])) {
-            return redirect()->back()->withInput()->with('error', $validation->getErrors());
-        }
-
-        // Ambil data dari form
-        $data = [
-            'name' => $this->request->getPost('name'),
-            'slug' => $this->request->getPost('slug'),
-            'about' => $this->request->getPost('about'),
-            'category_id' => $this->request->getPost('category_id'),
-            'teacher_id' => $this->request->getPost('teacher_id'),
-            'path_trailer' => $this->request->getPost('path_trailer'), // Optional
-            'thumbnail' => $this->request->getPost('thumbnail') // Optional
-        ];
-
-        // Update data kursus di database
-        $this->courseModel->update($id, $data);
-
-        // Redirect ke halaman kursus dengan pesan sukses
-        return redirect()->to('/admin/courses')->with('success', 'Course updated successfully');
-    }
-
-    public function delete($id)
-    {
-        // Cek apakah kursus ada
-        $course = $this->courseModel->find($id);
-
-        if (!$course) {
-            return redirect()->to('/admin/courses')->with('error', 'Course not found');
-        }
-
-        // Hapus kursus
-        $this->courseModel->delete($id);
-
-        // Redirect ke halaman kursus dengan pesan sukses
-        return redirect()->to('/admin/courses')->with('success', 'Course deleted successfully');
+        return redirect()->to('/teacher/courses')->with('message', 'Course successfully created!');
     }
 }

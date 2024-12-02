@@ -1,5 +1,6 @@
 <?php
 
+use App\Controllers\DashboardController;
 use CodeIgniter\Router\RouteCollection;
 
 /**
@@ -55,18 +56,24 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
         $routes->delete('teachers/delete/(:segment)', 'TeacherController::delete/$1');
 
         // Rute untuk mengelola course
-        $routes->get('courses', 'CourseController::index');
-        $routes->get('courses/create', 'CourseController::create');
+        $routes->get('courses', 'CourseController::manageAdmin', ['filter' => 'auth']);
+        
 
         // $routes->resource('teachers', ['controller' => 'TeacherController']);
         $routes->get('transactions', 'SubscribeTransactionController::index');
+        $routes->get('transactions/show/(:segment)', 'SubscribeTransactionController::show/$1');
+        $routes->post('transactions/approve/(:segment)', 'SubscribeTransactionController::update/$1');
+        $routes->post('transactions/pending/(:segment)', 'SubscribeTransactionController::updatePending/$1');
+
         $routes->resource('subscribe_transactions', ['controller' => 'SubscribeTransactionController']);
     });
 
     // Teacher Routes with Role 'teacher'
     $routes->group('teacher',['namespace' => 'App\Controllers', 'filter' => 'role:teacher'], function ($routes) {
         // Rute untuk mengelola course
-        $routes->get('course', 'TeacherController::courses');
+        $routes->get('courses', 'CourseController::manageTeacher');
+        $routes->get('courses/create', 'CourseController::create');
+        $routes->post('courses/store', 'CourseController::store');
         $routes->get('/teacher/loadManageCourses', 'TeacherController::loadManageCourses');
         $routes->get('courses/create', 'CourseController::create');
         $routes->delete('courses/delete/(:segment)', 'CourseController::delete/$1');

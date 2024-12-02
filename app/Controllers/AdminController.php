@@ -17,7 +17,18 @@ class AdminController extends BaseController
     
     public function dashboard()
     {
-        return view('admin/dashboard');  // Tampilan dashboard untuk admin
+        $session = session();
+
+        $data = [
+            'name'        => $session->get('name'), // Ambil data nama dari session
+            'courses'     => $session->get('courses'), // Data courses
+            'transactions'=> $session->get('transactions'), // Data transactions
+            'students'    => $session->get('students'), // Data students
+            'teachers'    => $session->get('teachers'), // Data teachers
+            'categories'  => $session->get('categories'), // Data categories
+        ];
+    
+        return view('admin/dashboard', $data);
     }
 
     public function courses()

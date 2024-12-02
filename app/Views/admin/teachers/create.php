@@ -131,11 +131,11 @@
 
     <div class="sidebar">
         <h3>Admin</h3>
-        <a href="#">Dashboard</a>
+        <a href="/admin/dashboard">Dashboard</a>
         <a href="/admin/categories">Manage Categories</a>
-        <a href="#">Manage Courses</a>
+        <a href="/admin/courses">Manage Courses</a>
         <a href="/admin/teachers">Manage Teachers</a>
-        <a href="#">Manage Subscriptions</a>
+        <a href="/admin/transactions">Manage Subscriptions</a>
         <a href="/logout">Logout</a>
     </div>
 

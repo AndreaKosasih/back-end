@@ -79,7 +79,7 @@
             <h3 class="text-center">Admin</h3>
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link active" href="#">Dashboard</a>
+                    <a class="nav-link active" href="/admin/dashboard">Dashboard</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/admin/categories">Manage Categories</a>
@@ -91,7 +91,7 @@
                     <a class="nav-link" href="/admin/teachers">Manage Teachers</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Manage Subscriptions</a>
+                    <a class="nav-link" href="/admin/transactions"">Manage Subscriptions</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/logout">Logout</a>

@@ -3,133 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Courses</title>
+    <title>Manage Courses - Teacher</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/font-awesome/css/font-awesome.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #f4f6f9;
+            background-color: #f8f9fa;
         }
+
         .sidebar {
             background-color: #343a40;
             color: white;
             min-height: 100vh;
+            padding: 20px;
         }
+
+        .sidebar h3 {
+            margin-bottom: 20px;
+        }
+
         .sidebar a {
             color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            display: block;
+            border-radius: 4px;
         }
-        .content-section {
-            display: none;
+
+        .container {
+            margin-left: 220px; /* Adjust sidebar width */
+            padding: 20px;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+        }
+
+        table {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        table th,
+        table td {
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        table th {
+            background-color: #495057;
+            color: black;
+        }
+
+        table tbody tr:hover {
+            background-color: #f1f3f5;
+        }
+
+        .btn {
+            border-radius: 20px;
+            padding: 5px 15px;
+        }
+
+        .btn-primary {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background-color: #bb2d3b;
+            border-color: #b02a37;
+        }
+
+        .add-new-btn {
+            margin-bottom: 15px;
         }
     </style>
 </head>
 <body>
     <div class="d-flex">
         <!-- Sidebar -->
-        <div class="sidebar p-3">
-            <h3 class="text-center">Teacher</h3>
+        <div class="sidebar">
+            <h3 class="text-center">Teacher Panel</h3>
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link" href="#" data-target="dashboard-content">Dashboard</a>
+                    <a class="nav-link active" href="/teacher/dashboard">Dashboard</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active" href="#" data-target="courses-content">Manage Courses</a>
+                    <a class="nav-link" href="/teacher/courses">Manage Courses</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</a>
+                    <a class="nav-link" href="/logout">Logout</a>
                 </li>
             </ul>
         </div>
 
         <!-- Main Content -->
-        <div class="container p-3">
-            <!-- Dashboard Content (Default) -->
-            <div id="dashboard-content" class="content-section">
-                <h2>Dashboard Content</h2>
-                <p>Welcome to the Teacher Dashboard!</p>
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1>Manage Courses (Teacher)</h1>
+                <a href="/teacher/courses/create" class="btn btn-success btn-sm add-new-btn">Add New Course</a>
             </div>
 
-            <!-- Manage Courses Content -->
-            <div id="courses-content" class="content-section">
-                <h2>Manage Your Courses</h2>
-                <p>Hello, <?= esc($teacherName) ?>. Here are the courses you are managing:</p>
-                <table class="table table-bordered">
-                    <thead>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Thumbnail</th>
+                        <th>Course Name</th>
+                        <th>Category</th>
+                        <th>Students</th>
+                        <th>Videos</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($courses as $course): ?>
                         <tr>
-                            <th>No</th>
-                            <th>Course Name</th>
-                            <th>Description</th>
-                            <th>Actions</th>
+                            <td>
+                                <img src="<?= base_url('writable/uploads/' . esc($course->thumbnail)) ?>" alt="Thumbnail" class="img-thumbnail" style="width: 120px; height: 90px;">
+                            </td>
+                            <td><?= esc($course->name) ?></td>
+                            <td><?= esc($course->category_name) ?></td>
+                            <td><?= esc($course->students_count) ?></td>
+                            <td><?= esc($course->videos_count) ?></td>
+                            <td>
+                                <a href="/teacher/courses/edit/<?= esc($course->id) ?>" class="btn btn-primary btn-sm">Edit</a>
+                                <form action="/teacher/courses/delete/<?= esc($course->id) ?>" method="POST" style="display:inline;">
+                                    <?= csrf_field() ?>
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                </form>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (empty($courses)): ?>
-                            <tr>
-                                <td colspan="4" class="text-center">No courses found.</td>
-                            </tr>
-                        <?php else: ?>
-                            <?php foreach ($courses as $index => $course): ?>
-                                <tr>
-                                    <td><?= esc($index + 1) ?></td>
-                                    <td><?= esc($course['course_name']) ?></td>
-                                    <td><?= esc($course['description']) ?></td>
-                                    <td>
-                                        <a href="/teacher/course/edit/<?= esc($course['id']) ?>" class="btn btn-primary btn-sm">Edit</a>
-                                        <a href="/teacher/course/delete/<?= esc($course['id']) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-                <a href="/teacher/course/create" class="btn btn-success">Create New Course</a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Logout -->
-    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="logoutModalLabel">Confirm Logout</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    Are you sure you want to log out?
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <form action="/logout" method="POST">
-                        <button type="submit" class="btn btn-danger">Logout</button>
-                    </form>
-                </div>
-            </div>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <script>
-        // Menangani klik pada menu sidebar untuk memunculkan konten tanpa berpindah halaman
-        document.querySelectorAll('.nav-link').forEach(function(link) {
-            link.addEventListener('click', function(event) {
-                event.preventDefault(); // Mencegah link berpindah halaman
-                
-                // Menyembunyikan semua konten
-                document.querySelectorAll('.content-section').forEach(function(content) {
-                    content.style.display = 'none';
-                });
-
-                // Menampilkan konten sesuai dengan target
-                const target = event.target.getAttribute('data-target');
-                if (target) {
-                    document.getElementById(target).style.display = 'block';
-                }
-            });
-        });
-
-        // Default: Tampilkan courses-content ketika halaman dimuat
-        document.getElementById('courses-content').style.display = 'block';
-    </script>
-
+</body>
+</html>

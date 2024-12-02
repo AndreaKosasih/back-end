@@ -32,34 +32,50 @@
     <div class="d-flex">
         <!-- Sidebar -->
         <div class="sidebar p-3">
-            <h3 class="text-center">Teacher</h3>
+            <h3 class="text-center">Admin</h3>
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link active" href="#" data-target="dashboard-content">Dashboard</a>
+                    <a class="nav-link active" href="/teacher/dashboard">Dashboard</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#" data-target="manage-courses-content">Manage Courses</a>
+                    <a class="nav-link" href="/teacher/courses">Manage Courses</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</a>
+                    <a class="nav-link" href="/logout">Logout</a>
                 </li>
             </ul>
         </div>
 
         <!-- Main Content -->
-        <div class="container p-3">
-            <div id="dashboard-content" class="content-section">
-                <h2>Dashboard Content</h2>
-                <p>Welcome to the Teacher Dashboard!</p>
-            </div>
-            <div id="manage-courses-content" class="content-section">
-                <!-- Courses content will be loaded here via AJAX -->
+        <div class="container mx-auto">
+        <h1 class="text-2xl font-bold">Welcome, <?= isset($name) ? esc($name) : 'User' ?></h1>
+            <p class="text-lg">Teacher Dashboard</p>
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Courses</h5>
+                            <p class="card-text"><?= esc($courses) ?></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Students</h5>
+                            <p class="card-text"><?= esc($students) ?></p>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
+
     </div>
 
     <!-- Modal Logout -->
-    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+    <!-- <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -77,13 +93,13 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <!-- Script untuk Bootstrap dan jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- jQuery first -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script>
+    <!-- <script>
         // Menangani klik pada menu sidebar untuk memunculkan konten tanpa berpindah halaman
         document.querySelectorAll('.nav-link').forEach(function(link) {
             link.addEventListener('click', function(event) {
@@ -128,7 +144,7 @@
 
         // Default: Tampilkan dashboard ketika halaman dimuat
         document.getElementById('dashboard-content').style.display = 'block';
-    </script>
+    </script> -->
 </body>
 
 </html>

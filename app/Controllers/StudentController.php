@@ -9,6 +9,14 @@ class StudentController extends BaseController
 {
     public function dashboard()
     {
-        return view('student/dashboard');  // Tampilan dashboard untuk student
+        $session = session();
+
+        $data = [
+            'name'        => $session->get('name'), // Ambil data nama dari session
+            'enrolledCourses' => $session->get('enrolledCourses'), // Kursus yang diikuti
+            'categories'  => $session->get('categories'), // Kategori dari kursus yang diikuti
+        ];
+
+        return view('student/dashboard', $data);
     }
 }

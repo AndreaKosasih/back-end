@@ -26,36 +26,46 @@ class TeacherController extends BaseController
 
     public function dashboard()
     {
-        // Step 1: Get the user_id from the session
-        $userId = session()->get('user_id');
+        // // Step 1: Get the user_id from the session
+        // $userId = session()->get('user_id');
 
-        // Step 2: Fetch the user from the userModel
-        $user = $this->userModel->find($userId);
+        // // Step 2: Fetch the user from the userModel
+        // $user = $this->userModel->find($userId);
 
-        // If the user is not found, redirect to login
-        if (!$user) {
-            return redirect()->to('/login');
-        }
+        // // If the user is not found, redirect to login
+        // if (!$user) {
+        //     return redirect()->to('/login');
+        // }
 
-        // Step 3: Check the user's role from RoleUserModel
-        $roleUser = $this->roleUserModel->where('user_id', $userId)->first();
+        // // Step 3: Check the user's role from RoleUserModel
+        // $roleUser = $this->roleUserModel->where('user_id', $userId)->first();
 
-        // If the roleUser is not found or the role_id is not for a teacher (e.g., role_id == 3), deny access
-        if (!$roleUser || $roleUser['role_id'] != 3) {
-            return redirect()->to('/login'); // Unauthorized access if not a teacher
-        }
+        // // If the roleUser is not found or the role_id is not for a teacher (e.g., role_id == 3), deny access
+        // if (!$roleUser || $roleUser['role_id'] != 3) {
+        //     return redirect()->to('/login'); // Unauthorized access if not a teacher
+        // }
 
-        // Step 4: Teacher is validated, fetch the teacher's name
-        $teacherName = $user['name']; // Assuming the name is stored in the 'name' column of the user table
+        // // Step 4: Teacher is validated, fetch the teacher's name
+        // $teacherName = $user['name']; // Assuming the name is stored in the 'name' column of the user table
 
-        // Step 5: Fetch the courses managed by the teacher
-        $courses = $this->courseModel->where('teacher_id', $userId)->findAll();
+        // // Step 5: Fetch the courses managed by the teacher
+        // $courses = $this->courseModel->where('teacher_id', $userId)->findAll();
 
-        // Step 6: Pass the teacher's name and the courses to the view
-        return view('teacher/dashboard', [
-            'teacherName' => $teacherName,
-            'courses' => $courses
-        ]);
+        // // Step 6: Pass the teacher's name and the courses to the view
+        // return view('teacher/dashboard', [
+        //     'teacherName' => $teacherName,
+        //     'courses' => $courses
+        // ]);
+        $session = session();
+
+        $data = [
+            'name'        => $session->get('name'), // Ambil data nama dari session
+            'courses'     => $session->get('courses'), // Data courses yang diajar
+            'students'    => $session->get('students'), // Data jumlah siswa
+            'categories'  => $session->get('categories'), // Kategori yang terkait dengan kursus
+        ];
+
+        return view('teacher/dashboard', $data);
     }
 
     public function index()
